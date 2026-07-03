@@ -1,0 +1,12 @@
+CREATE TABLE role_allocation (
+    id   INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(35) NOT NULL UNIQUE
+);
+
+CREATE TABLE skill (
+    id   VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(35) NOT NULL,
+    description VARCHAR(300) NOT NULL,
+    category VARCHAR(35) NOT NULL,
+    status VARCHAR(35) NOT NULL
+);
