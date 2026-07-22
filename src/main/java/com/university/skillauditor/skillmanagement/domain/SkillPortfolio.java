@@ -24,6 +24,7 @@ public class SkillPortfolio extends Entity<SkillPortfolio> implements AggregateR
     private LocalDateTime updatedAt;
     private String rejectedById;
 
+
     public static final String SKILL_ID_CANNOT_BE_NULL = "Skill ID cannot be empty";
     public static final String STAFF_MEMBER_ID_CANNOT_BE_NULL = "Staff member ID cannot be empty";
     public static final String SKILL_LEVEL_CANNOT_BE_NULL = "Skill Level cannot be empty";
