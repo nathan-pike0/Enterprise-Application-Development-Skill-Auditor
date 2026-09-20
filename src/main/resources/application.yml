@@ -8,5 +8,41 @@ spring:
   sql:
     init:
       mode: always
+  rabbitmq:
+    host: seal-01.lmq.cloudamqp.com
+    username: wjhrgulb
+    password: b64XogMmpvTijbc0SuAN0yMFuNl1_D-L
+    virtual-host: wjhrgulb
+    ssl:
+      enabled: true
 server:
   port: 8900
+  server-header: ""
+
+rabbitmq:
+  outbox:
+    bindings:
+      "[com.university.skillauditor.shared.events.StaffDetailsUpdatedEvent]":
+        exchange: "staff"
+        routing-key: "staffDetailsUpdatedKey"
+      "[com.university.skillauditor.shared.events.StaffDepartmentUpdatedEvent]":
+        exchange: "staff"
+        routing-key: "staffDepartmentUpdatedKey"
+      "[com.university.skillauditor.shared.events.StaffPlacementUpdatedEvent]":
+        exchange: "staff"
+        routing-key: "staffPlacementUpdatedKey"
+      "[com.university.skillauditor.shared.events.NewStaffMemberAddedEvent]":
+        exchange: "staff"
+        routing-key: "newStaffMemberAddedKey"
+firebase:
+  web-api-key: AIzaSyDwqvBxFRpkFsUDBOVYa6Km7h4a_8gb-U4
+
+logging:
+  level:
+    root: WARN
+    com.university.skillauditor: INFO
+    org.hibernate: WARN
+    org.springframework: WARN
+    com.zaxxer.hikari: WARN
+  file:
+    name: logs/skill-auditor.log

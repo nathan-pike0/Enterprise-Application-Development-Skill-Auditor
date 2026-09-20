@@ -31,3 +31,28 @@ CREATE TABLE portfolio_note (
     added_by_id VARCHAR(36) NOT NULL,
     added_at VARCHAR(36) NOT NULL
 );
+
+
+CREATE TABLE staff_member (
+    id VARCHAR(36) PRIMARY KEY,
+    first_name VARCHAR(36) NOT NULL,
+    last_name VARCHAR(36) NOT NULL,
+    email VARCHAR(35) NOT NULL,
+    hire_date VARCHAR(35),
+    department_id VARCHAR(36) NOT NULL,
+    line_manager_id VARCHAR(36),
+    job_role VARCHAR(36) NOT NULL,
+    role_start_date VARCHAR(35),
+    job_level VARCHAR(35),
+    employment_type VARCHAR(35) NOT NULL,
+    employment_status VARCHAR(35) NOT NULL
+);
+
+CREATE TABLE event_store(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    occurred_on DATE NOT NULL,
+    event_body VARCHAR(66666) NOT NULL,
+    event_type VARCHAR(150) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    retry_count INT DEFAULT 0 NOT NULL
+);

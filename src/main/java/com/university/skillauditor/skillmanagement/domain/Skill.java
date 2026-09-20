@@ -1,12 +1,11 @@
 package com.university.skillauditor.skillmanagement.domain;
 
 import com.university.skillauditor.shared.AggregateRoot;
-import com.university.skillauditor.shared.Entity;
 import com.university.skillauditor.shared.Identity;
 
 import static com.university.skillauditor.shared.DomainAssertions.argumentNotEmpty;
 
-public class Skill extends Entity<Skill> implements AggregateRoot {
+public class Skill extends AggregateRoot<Skill> {
     private String name;
     private String description;
     private String category;

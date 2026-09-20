@@ -1,26 +1,29 @@
 package com.university.skillauditor.skillmanagement.application;
 
 import com.university.skillauditor.shared.Identity;
+import com.university.skillauditor.shared.exceptions.SkillNotFoundException;
 import com.university.skillauditor.skillmanagement.domain.Skill;
 import com.university.skillauditor.skillmanagement.domain.SkillStatus;
 import com.university.skillauditor.skillmanagement.infrastructure.SkillEntity;
 import com.university.skillauditor.skillmanagement.infrastructure.SkillRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import com.university.skillauditor.skillmanagement.api.SkillResponse;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class SkillService {
     private SkillRepository skillRepository;
 
     public void createSkill(String name, String description, String category) {
+        log.info("Creating skill: name={}, category={}", name, category);
+
         Identity<Skill> id = Identity.generateId();
 
         Skill skill = new Skill(id, name, description, category, SkillStatus.ACTIVE);
@@ -53,7 +56,7 @@ public class SkillService {
     public SkillResponse getSkillById(String id) {
         Optional<SkillEntity> result = skillRepository.findById(id);
         if (result.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Skill not found");
+            throw new SkillNotFoundException(id);
         }
         SkillEntity entity = result.get();
         return new SkillResponse(
@@ -66,9 +69,11 @@ public class SkillService {
     }
 
     public void updateSkill(String id, String name, String description, String category) {
+        log.info("Updating skill: id={}", id);
+
         Optional<SkillEntity> result = skillRepository.findById(id);
         if (result.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id not found");
+            throw new SkillNotFoundException(id);
         }
 
         SkillEntity entity = result.get();
@@ -81,9 +86,11 @@ public class SkillService {
     }
 
     public void deactivateSkill(String id) {
+        log.info("Deactivating skill: id={}", id);
+
         Optional<SkillEntity> result = skillRepository.findById(id);
         if (result.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id not found");
+            throw new SkillNotFoundException(id);
         }
         SkillEntity entity = result.get();
 
@@ -103,9 +110,11 @@ public class SkillService {
     }
 
     public void activateSkill(String id) {
+        log.info("Activating skill: id={}", id);
+
         Optional<SkillEntity> result = skillRepository.findById(id);
         if (result.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Skill not found");
+            throw new SkillNotFoundException(id);
         }
         SkillEntity entity = result.get();
         Skill skill = new Skill(

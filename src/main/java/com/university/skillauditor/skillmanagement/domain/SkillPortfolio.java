@@ -1,8 +1,8 @@
 package com.university.skillauditor.skillmanagement.domain;
 
 import com.university.skillauditor.shared.AggregateRoot;
-import com.university.skillauditor.shared.Entity;
 import com.university.skillauditor.shared.Identity;
+import com.university.skillauditor.shared.events.SkillVerifiedEvent;
 
 import static com.university.skillauditor.shared.DomainAssertions.argumentNotEmpty;
 
@@ -11,19 +11,18 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SkillPortfolio extends Entity<SkillPortfolio> implements AggregateRoot {
+public class SkillPortfolio extends AggregateRoot<SkillPortfolio> {
 
-    private String staffMemberId;
-    private String skillId;
+    private final String staffMemberId;
+    private final String skillId;
     private SkillLevel skillLevel;
     private LocalDate expiryDate;
     private PortfolioStatus status;
     private String verifiedById;
-    private List<PortfolioNote> notes;
-    private LocalDateTime submittedAt;
-    private LocalDateTime updatedAt;
     private String rejectedById;
-
+    private final List<PortfolioNote> notes;
+    private final LocalDateTime submittedAt;
+    private LocalDateTime updatedAt;
 
     public static final String SKILL_ID_CANNOT_BE_NULL = "Skill ID cannot be empty";
     public static final String STAFF_MEMBER_ID_CANNOT_BE_NULL = "Staff member ID cannot be empty";
@@ -35,14 +34,17 @@ public class SkillPortfolio extends Entity<SkillPortfolio> implements AggregateR
     public static final String NOTE_CANNOT_BE_EMPTY = "Note cannot be empty";
     public static final String NOTED_BY_CANNOT_BE_NULL = "Noted by ID cannot be null";
 
-    public SkillPortfolio(Identity<SkillPortfolio> id,
-                          String staffMemberId,
-                          String skillId,
-                          SkillLevel skillLevel,
-                          LocalDate expiryDate) {
-
+    private SkillPortfolio(Identity<SkillPortfolio> id,
+                           String staffMemberId,
+                           String skillId,
+                           SkillLevel skillLevel,
+                           LocalDate expiryDate,
+                           PortfolioStatus status,
+                           String verifiedById,
+                           String rejectedById,
+                           LocalDateTime submittedAt,
+                           LocalDateTime updatedAt) {
         super(id);
-
         argumentNotEmpty(staffMemberId, STAFF_MEMBER_ID_CANNOT_BE_NULL);
         argumentNotEmpty(skillId, SKILL_ID_CANNOT_BE_NULL);
         if (skillLevel == null) {
@@ -52,10 +54,35 @@ public class SkillPortfolio extends Entity<SkillPortfolio> implements AggregateR
         this.skillId = skillId;
         this.skillLevel = skillLevel;
         this.expiryDate = expiryDate;
-        this.status = PortfolioStatus.PENDING;
+        this.status = status;
+        this.verifiedById = verifiedById;
+        this.rejectedById = rejectedById;
         this.notes = new ArrayList<>();
-        this.submittedAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.submittedAt = submittedAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public SkillPortfolio(Identity<SkillPortfolio> id,
+                          String staffMemberId,
+                          String skillId,
+                          SkillLevel skillLevel,
+                          LocalDate expiryDate) {
+        this(id, staffMemberId, skillId, skillLevel, expiryDate,
+                PortfolioStatus.PENDING, null, null, LocalDateTime.now(), LocalDateTime.now());
+    }
+
+    public static SkillPortfolio reconstitute(Identity<SkillPortfolio> id,
+                                              String staffMemberId,
+                                              String skillId,
+                                              SkillLevel skillLevel,
+                                              LocalDate expiryDate,
+                                              PortfolioStatus status,
+                                              String verifiedById,
+                                              String rejectedById,
+                                              LocalDateTime submittedAt,
+                                              LocalDateTime updatedAt) {
+        return new SkillPortfolio(id, staffMemberId, skillId, skillLevel, expiryDate,
+                status, verifiedById, rejectedById, submittedAt, updatedAt);
     }
 
     public final void verifySkill(String verifiedById) {
@@ -63,13 +90,19 @@ public class SkillPortfolio extends Entity<SkillPortfolio> implements AggregateR
             throw new IllegalArgumentException(CANNOT_VERIFY_NOT_PENDING);
         }
         argumentNotEmpty(verifiedById, NOTED_BY_CANNOT_BE_NULL);
+
         this.status = PortfolioStatus.VERIFIED;
         this.verifiedById = verifiedById;
         this.updatedAt = LocalDateTime.now();
 
+        addDomainEvent(new SkillVerifiedEvent(
+                LocalDate.now(),
+                this.id.id(),
+                this.skillId,
+                this.staffMemberId,
+                verifiedById
+        ));
     }
-
-
     public final void unverifySkill() {
         if (status != PortfolioStatus.VERIFIED) {
             throw new IllegalArgumentException(CANNOT_UNVERIFY_NOT_VERIFIED);
@@ -112,13 +145,10 @@ public class SkillPortfolio extends Entity<SkillPortfolio> implements AggregateR
                 note,
                 addedById
         );
+
         this.notes.add(portfolioNote);
         this.updatedAt = LocalDateTime.now();
     }
-
-
-
-
 
     public String staffMemberId() { return staffMemberId; }
     public String skillId() { return skillId; }

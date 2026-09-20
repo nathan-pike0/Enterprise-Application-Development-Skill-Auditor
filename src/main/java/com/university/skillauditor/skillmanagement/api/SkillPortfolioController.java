@@ -1,9 +1,10 @@
 package com.university.skillauditor.skillmanagement.api;
 
-import com.university.skillauditor.skillmanagement.application.SkillPortfolioService;
+import com.university.skillauditor.skillmanagement.SkillManagementFacade;
 import com.university.skillauditor.skillmanagement.domain.SkillLevel;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -14,13 +15,13 @@ import java.util.List;
 @AllArgsConstructor
 public class SkillPortfolioController {
 
-    private SkillPortfolioService skillPortfolioService;
+    private SkillManagementFacade skillManagementFacade;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createPortfolioEntry(@RequestBody SkillPortfolioRequest request) {
-        skillPortfolioService.createPortfolioEntry(
-                request.getStaffMemberId(),
+    public void createPortfolioEntry(@RequestBody SkillPortfolioRequest request, Authentication authentication) {
+        skillManagementFacade.createPortfolioEntry(
+                authentication.getName(),
                 request.getSkillId(),
                 SkillLevel.valueOf(request.getSkillLevel()),
                 request.getExpiryDate() != null ? LocalDate.parse(request.getExpiryDate()) : null
@@ -30,58 +31,65 @@ public class SkillPortfolioController {
     @PatchMapping("/{id}/edit")
     @ResponseStatus(HttpStatus.OK)
     public void editPortfolioEntry(@PathVariable String id,
-                                   @RequestBody SkillPortfolioRequest request) {
-        skillPortfolioService.editPortfolioEntry(
+                                   @RequestBody SkillPortfolioRequest request,
+                                   Authentication authentication) {
+        skillManagementFacade.editPortfolioEntry(
                 id,
+                authentication.getName(),
                 SkillLevel.valueOf(request.getSkillLevel()),
                 request.getExpiryDate() != null ? LocalDate.parse(request.getExpiryDate()) : null
         );
     }
-
     @GetMapping
-    public List<SkillPortfolioResponse> getAllEntries() {
-        return skillPortfolioService.getAllEntries();
+    public List<SkillPortfolioResponse> getAllEntries(
+            @RequestParam(required = false) String staffMemberId,
+            @RequestParam(required = false) String skillId,
+            @RequestParam(required = false) String skillLevel) {
+        return skillManagementFacade.getFilteredEntries(staffMemberId, skillId, skillLevel);
+    }
+
+    @GetMapping("/my")
+    public List<SkillPortfolioResponse> getMyEntries(Authentication authentication) {
+        return skillManagementFacade.getMyEntries(authentication.getName());
     }
 
     @GetMapping("/{id}")
     public SkillPortfolioResponse getEntryById(@PathVariable String id) {
-        return skillPortfolioService.getEntryById(id);
+        return skillManagementFacade.getEntryById(id);
     }
 
     @GetMapping("/pending")
     public List<SkillPortfolioResponse> getPendingEntries() {
-        return skillPortfolioService.getPendingEntries();
+        return skillManagementFacade.getPendingEntries();
     }
 
     @GetMapping("/expired")
     public List<SkillPortfolioResponse> getExpiredEntries() {
-        return skillPortfolioService.getExpiredEntries();
+        return skillManagementFacade.getExpiredEntries();
     }
 
     @PatchMapping("/{id}/verify")
     @ResponseStatus(HttpStatus.OK)
-    public void verifyEntry(@PathVariable String id,
-                            @RequestBody SkillPortfolioRequest request) {
-        skillPortfolioService.verifyEntry(id, request.getStaffMemberId());
+    public void verifyEntry(@PathVariable String id, Authentication authentication) {
+        skillManagementFacade.verifyEntry(id, authentication.getName());
     }
 
     @PatchMapping("/{id}/unverify")
     @ResponseStatus(HttpStatus.OK)
     public void unverifyEntry(@PathVariable String id) {
-        skillPortfolioService.unverifyEntry(id);
+        skillManagementFacade.unverifyEntry(id);
     }
 
     @PatchMapping("/{id}/reject")
     @ResponseStatus(HttpStatus.OK)
-    public void rejectEntry(@PathVariable String id,
-                            @RequestBody SkillPortfolioRequest request) {
-        skillPortfolioService.rejectEntry(id, request.getStaffMemberId());
+    public void rejectEntry(@PathVariable String id, Authentication authentication) {
+        skillManagementFacade.rejectEntry(id, authentication.getName());
     }
 
     @PostMapping("/{id}/notes")
     @ResponseStatus(HttpStatus.CREATED)
     public void addNote(@PathVariable String id,
-                        @RequestBody AddNoteRequest request) {
-        skillPortfolioService.addNote(id, request.getNote(), request.getManagerId());
+                        @RequestBody AddNoteRequest request, Authentication authentication) {
+        skillManagementFacade.addNote(id, request.getNote(), authentication.getName());
     }
 }

@@ -23,8 +23,7 @@ public class RoleAllocationController {
     @GetMapping("/{id}")
     public RoleAllocation getById(@PathVariable Long id) {
         return roleAllocationRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Role allocation not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role allocation not found"));
     }
 
     @PostMapping
@@ -35,11 +34,9 @@ public class RoleAllocationController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable Long id,
-                       @Valid @RequestBody RoleAllocation update) {
+    public void update(@PathVariable Long id, @Valid @RequestBody RoleAllocation update) {
         RoleAllocation existing = roleAllocationRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Role allocation not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role allocation not found"));
         existing.setName(update.getName());
         roleAllocationRepository.save(existing);
     }
@@ -48,8 +45,7 @@ public class RoleAllocationController {
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable Long id) {
         if (!roleAllocationRepository.existsById(id)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Role allocation not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role allocation not found");
         }
         roleAllocationRepository.deleteById(id);
     }
